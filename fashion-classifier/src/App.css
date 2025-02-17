@@ -1,0 +1,124 @@
+/* App.css */
+
+/* General Styles */
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.App {
+  text-align: center;
+}
+
+/* Header */
+.App-header {
+  background-color: #3498db; /* Example - use your preferred color */
+  color: white;
+  padding: 20px 0;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2.5em;
+}
+
+/* Main Content */
+main {
+  padding: 20px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+input[type="file"] {
+  display: block;
+  margin: 10px auto;
+}
+
+button {
+  background-color: #2ecc71; /* Example - use your preferred color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #bdc3c7; /* Example - use your preferred color */
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+
+/* Image Preview Area */
+.preview-area {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  background-color: white;
+}
+
+.uploaded-image {
+  max-width: 300px;
+  max-height: 300px;
+  display: block; /* Ensures image takes up its own line */
+  margin: 10px auto; /* Centers the image */
+}
+
+/* Loading Animation */
+.loading-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #3498db; /* Example - use your preferred color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Prediction Results */
+.prediction-results {
+  margin-top: 20px;
+}
+
+.predicted-class,
+.confidence {
+  margin-bottom: 5px;
+  font-size: 1.1em;
+}
+
+/* Footer */
+.App-footer {
+  background-color: #333; /* Example - use your preferred color */
+  color: white;
+  padding: 10px 0;
+  position: fixed; /* Fixed footer at the bottom */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center; /* Center text in footer */
+}

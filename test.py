@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk
 import numpy as np
 import tensorflow as tf
@@ -26,10 +26,8 @@ def preprocess_image(image_path):
 # Function to make predictions
 def predict_image(image_path):
     img_array = preprocess_image(image_path)
-    prediction = model.predict(img_array)
-    predicted_class = np.argmax(prediction)
-    confidence = np.max(prediction)
-    return class_labels[predicted_class], confidence
+    predictions = model.predict(img_array)[0]
+    return predictions
 
 # Function to handle image upload
 def upload_image():
@@ -38,56 +36,99 @@ def upload_image():
         filetypes=[("Image Files", "*.png *.jpg *.jpeg")]
     )
     if file_path:
-        # Display the uploaded image
-        img = Image.open(file_path)
-        # Line 43 in upload_image function
-        img = img.resize((200, 200), Image.LANCZOS)
-        img = ImageTk.PhotoImage(img)
-        image_label.config(image=img)
-        image_label.image = img  # Keep a reference to avoid garbage collection
+        # Clear previous results
+        for widget in results_frame.winfo_children():
+            widget.destroy()
+        
+        # Display loading state
+        loading_label.config(text="Analyzing image...")
+        root.update()
+        
+        try:
+            # Display the uploaded image
+            img = Image.open(file_path)
+            img = img.resize((200, 200), Image.LANCZOS)
+            img = ImageTk.PhotoImage(img)
+            image_label.config(image=img)
+            image_label.image = img
 
-        # Make prediction
-        predicted_class, confidence = predict_image(file_path)
-        result_label.config(text=f"Prediction: {predicted_class}\nConfidence: {confidence:.2%}")
+            # Make prediction
+            predictions = predict_image(file_path)
+            
+            # Hide loading text
+            loading_label.config(text="")
+            
+            # Display results with progress bars
+            for i, (class_name, confidence) in enumerate(zip(class_labels, predictions)):
+                create_result_row(i, class_name, confidence)
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to process image: {str(e)}")
+            loading_label.config(text="")
+
+def create_result_row(index, class_name, confidence):
+    row_frame = tk.Frame(results_frame)
+    row_frame.pack(fill='x', pady=2)
+    
+    # Class label
+    label = tk.Label(row_frame, text=class_name, width=15, anchor='w')
+    label.pack(side='left', padx=5)
+    
+    # Percentage label
+    perc_label = tk.Label(row_frame, text=f"{confidence:.1%}", width=6)
+    perc_label.pack(side='left')
+    
+    # Progress bar
+    progress = ttk.Progressbar(row_frame, orient='horizontal', 
+                             length=200, mode='determinate')
+    progress['value'] = confidence * 100
+    progress.pack(side='left', expand=True, fill='x')
+    
+    # Highlight top prediction
+    if confidence == max(predictions):
+        label.config(fg='#2ecc71', font=('Helvetica', 9, 'bold'))
+        perc_label.config(fg='#2ecc71', font=('Helvetica', 9, 'bold'))
+        progress.config(style='success.Horizontal.TProgressbar')
+    else:
+        label.config(fg='#34495e')
+        progress.config(style='default.Horizontal.TProgressbar')
 
 # Create the main GUI window
 root = tk.Tk()
-root.title("Fashion MNIST Classifier")
-root.geometry("400x400")
-root.configure(bg="#f0f0f0")
+root.title("Fashion Classifier Pro")
+root.geometry("600x700")
+root.configure(bg='#ecf0f1')
 
-# Title label
-title_label = tk.Label(
-    root,
-    text="Fashion MNIST Classifier",
-    font=("Helvetica", 16, "bold"),
-    bg="#f0f0f0"
-)
+# Custom styles
+style = ttk.Style()
+style.theme_use('clam')
+style.configure('default.Horizontal.TProgressbar', 
+               background='#bdc3c7', troughcolor='#ecf0f1')
+style.configure('success.Horizontal.TProgressbar', 
+               background='#2ecc71', troughcolor='#ecf0f1')
+
+# Header
+header_frame = tk.Frame(root, bg='#2ecc71')
+header_frame.pack(fill='x', pady=(0, 20))
+title_label = tk.Label(header_frame, text="Fashion Classifier Pro", 
+                      font=('Helvetica', 16, 'bold'), bg='#2ecc71', fg='white')
 title_label.pack(pady=10)
 
-# Upload button
-upload_button = tk.Button(
-    root,
-    text="Upload Image",
-    command=upload_image,
-    font=("Helvetica", 12),
-    bg="#4CAF50",
-    fg="white"
-)
+# Upload Button
+upload_button = ttk.Button(root, text="Upload Image", command=upload_image)
 upload_button.pack(pady=10)
 
-# Image display label
-image_label = tk.Label(root, bg="#f0f0f0")
+# Image display area
+image_label = tk.Label(root, bg='#ecf0f1')
 image_label.pack(pady=10)
 
-# Result label
-result_label = tk.Label(
-    root,
-    text="Prediction: None\nConfidence: 0%",
-    font=("Helvetica", 12),
-    bg="#f0f0f0"
-)
-result_label.pack(pady=10)
+# Loading label
+loading_label = tk.Label(root, text="", font=('Helvetica', 12), bg='#ecf0f1', fg='#e74c3c')
+loading_label.pack()
 
-# Run the GUI
+# Results frame
+results_frame = tk.Frame(root, bg='#ecf0f1')
+results_frame.pack(fill='both', expand=True, padx=20, pady=10)
+
+# Start the GUI event loop
 root.mainloop()
